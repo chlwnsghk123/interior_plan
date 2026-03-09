@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interior Plan</title>
+    <!-- html2canvas 라이브러리 추가 (이미지 저장용) -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        /* Toss Style & Reset */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background-color: #F2F4F6; /* Toss Grey Background */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            flex-direction: row;
+            gap: 20px;
+            padding-top: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .rooms-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-end; /* 1층과 2층 하단 맞추기 */
+        }
+
+        /* 1. & 2. 방 만들기 (380 * 510) */
+        .room {
+            position: relative;
+            width: 380px;
+            height: 510px; 
+            background-color: #F7F3E9; /* Light Beige Floor */
+            border: 4px solid #333333; /* Wall Line */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08); /* Soft Shadow */
+            box-sizing: content-box;
+            border-radius: 4px;
+            transition: background-image 0.2s;
+            background-image: 
+                linear-gradient(#E5E8EB 1px, transparent 1px), 
+                linear-gradient(90deg, #E5E8EB 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+
+        .room-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 2층 방 스타일 (380 * 480) */
+        .room.room-2f {
+            height: 480px;
+        }
+
+        .room-label {
+            font-size: 16px;
+            font-weight: 700;
+            color: #4E5968;
+        }
+
+        /* 가구 공통 스타일 */
+        .fixture {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #FFFFFF;
+            box-sizing: border-box;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.2s;
+            cursor: default;
+        }
+
+        /* 4. 신발장: 오른쪽 위 100*70 */
+        .shoe-rack {
+            width: 100px;
+            height: 70px;
+            top: 0;
+            right: 0;
+            background-color: #6B7684; /* Unified Dark Gray */
+            border-bottom-left-radius: 12px;
+        }
+
+        /* 5. 계단: 70*210, 오른쪽 위 좌표 (0, 225) 시작 */
+        /* 좌표 해석: 오른쪽 벽(right:0) 기준, 위에서 225px 내려온 지점 */
+        .stairs {
+            width: 70px;
+            height: 210px;
+            top: 225px;
+            right: 0;
+            background-color: #6B7684; /* Unified Dark Gray */
+            /* 계단 느낌을 주는 줄무늬 패턴 */
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 29px,
+                rgba(255,255,255,0.4) 30px
+            );
+        }
+
+        /* 6. 뒷문: 1*100, 오른쪽 아래 */
+        .back-door {
+            width: 100px;
+            height: 6px;
+            bottom: 0;
+            right: 0;
+            background-color: #6B7684; /* Unified Dark Gray */
+            border: none;
+            color: white;
+            font-size: 10px;
+        }
+        /* 뒷문 텍스트 라벨 */
+        .back-door::before {
+            content: '뒷문';
+            position: absolute;
+            top: -20px;
+            right: 35px;
+            width: 30px;
+            color: #8B95A1;
+        }
+
+        /* 7. 화장실: 200*170 왼쪽 위 */
+        .bathroom {
+            width: 200px;
+            height: 170px;
+            top: 0;
+            left: 0;
+            background-color: #6B7684; /* Unified Dark Gray */
+            border-bottom-right-radius: 16px;
+        }
+
+        /* 8. 싱크대: 화장실 바로 왼쪽에 붙어서 아래 150*60 */
+        /* 해석: 화장실(왼쪽 벽) 아래에 이어서 배치 */
+        .sink {
+            width: 150px;
+            height: 60px;
+            top: 170px; /* 화장실 높이(170) 바로 아래 */
+            left: 0;
+            background-color: #6B7684; /* Unified Dark Gray */
+            border-bottom-right-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        /* 책장: 100*30, 왼쪽 아래 */
+        .bookshelf {
+            width: 30px;
+            height: 100px;
+            bottom: 0;
+            left: 0;
+            background-color: #A89F91; /* Dark Beige */
+            writing-mode: vertical-rl; /* 텍스트 세로 쓰기 */
+            border-top-right-radius: 8px;
+        }
+
+        /* 2층 구조물 스타일 */
+        /* 계단: 왼쪽 아래 기준 310, 85 위치 */
+        .stairs-2f {
+            width: 70px;
+            height: 140px;
+            bottom: 85px;
+            left: 310px;
+            background-color: #6B7684;
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 19px,
+                rgba(255,255,255,0.4) 20px
+            );
+        }
+
+        /* 막힌 공간 (X): 0,310 위치 (왼쪽 위) 215*170 */
+        .void-area {
+            width: 215px;
+            height: 170px;
+            top: 0;
+            left: 0;
+            background-color: #4E5968; /* 어두운 회색으로 명확히 구분 */
+            color: #E5E8EB; /* 어두운 배경에 맞는 밝은 텍스트 색상 */
+            font-size: 24px;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 공간 칸막이: 215,310 위치 (오른쪽 위) 165*170 (추정) */
+        .partition-area {
+            width: 165px;
+            height: 170px;
+            top: 0;
+            right: 0;
+            background-color: #F7F3E9; /* Same as floor */
+            background-image: 
+                linear-gradient(#E5E8EB 1px, transparent 1px), 
+                linear-gradient(90deg, #E5E8EB 1px, transparent 1px);
+            background-size: 10px 10px;
+            border-bottom: 2px dashed #AEB9C7; /* 커튼/구분선 처리 */
+        }
+
+        /* 추가된 가구 스타일 */
+        .movable {
+            cursor: grab;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .movable:active {
+            cursor: grabbing;
+        }
+        .selected {
+            outline: 2px solid #3182F6; /* Selection Highlight */
+            z-index: 100;
+            box-shadow: 0 0 0 4px rgba(49, 130, 246, 0.2); /* Add soft glow */
+        }
+
+        /* 컨트롤 패널 */
+        .controls {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 380px; /* 방 너비와 맞춤 */
+        }
+        .controls button {
+            padding: 8px 16px;
+            background-color: #3182F6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .controls button:hover { opacity: 0.9; }
+        
+        /* 버튼 스타일 통일 */
+        .controls .btn-primary { background-color: #3182F6; color: white; }
+        .controls .btn-secondary { background-color: #8B95A1; color: white; }
+        .controls .btn-success { background-color: #2AC1BC; color: white; }
+        .controls .btn-outline { background-color: white; color: #3182F6; border: 1px solid #3182F6; }
+        .controls .btn-outline:hover { background-color: #F2F4F6; }
+        .controls .btn-warning { background-color: #FFB340; color: white; }
+        .controls .btn-danger { background-color: #FF6B6B; color: white; }
+
+        /* 색상 선택기 */
+        .color-swatches {
+            display: flex;
+            gap: 8px;
+        }
+        .swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+        .swatch:hover { transform: scale(1.1); }
+        .swatch.active { border-color: #3182F6; }
+
+        /* 치수 툴팁 */
+        .dimension-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+            white-space: nowrap;
+        }
+
+        /* 가구 목록 (팔레트) */
+        #palette-container {
+            width: 200px;
+            height: 620px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 15px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        #palette-container h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        #palette-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .palette-item {
+            padding: 10px;
+            background: #F2F4F6;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: grab;
+            border: 1px solid #E5E8EB;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            transition: opacity 0.2s;
+        }
+        .palette-item.dragging {
+            opacity: 0.5;
+            background-color: #E5E8EB;
+        }
+
+        #toggle-creation-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: auto; /* 버튼을 패널 하단으로 밀어냄 */
+            background-color: #3182F6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #toggle-creation-btn:hover {
+            background-color: #1B64DA;
+        }
+        #toggle-creation-btn.delete-zone {
+            background-color: #FF5F5F;
+            content: '삭제';
+        }
+
+        #creation-panel {
+            background-color: #F9FAFB;
+            border: 1px solid #E5E8EB;
+            border-radius: 8px;
+            margin-top: 15px;
+            padding: 15px;
+            display: none; /* 처음에는 숨김 */
+            flex-direction: column;
+            gap: 12px;
+        }
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-section label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #4E5968;
+        }
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+        #creation-panel input, #creation-panel select {
+            padding: 8px;
+            border: 1px solid #D1D6DB;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #FFFFFF;
+        }
+        #creation-panel button {
+            margin-top: 5px;
+            background-color: #3182F6; /* Toss Blue */
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 15px;
+        }
+        #creation-panel button:hover {
+            background-color: #1B64DA;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(51, 61, 75, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease, top 0.3s ease;
+            pointer-events: none;
+            z-index: 2000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .toast.show {
+            opacity: 1;
+            top: 30px;
+        }
+
+        /* 모바일 반응형 스타일 */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                align-items: center;
+                padding-bottom: 40px;
+            }
+            .room {
+                transform-origin: top center;
+                /* 화면보다 방이 크면 축소해서 보여줌 (선택사항) */
+                max-width: 95vw;
+            }
+            #palette-container {
+                width: 95vw;
+                height: auto;
+                max-height: 400px;
+            }
+            .controls {
+                max-width: 95vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="rooms-container">
+            <!-- 1층 래퍼 -->
+            <div class="room-wrapper">
+                <div class="room" id="room-1f">
+                    <div class="fixture bathroom">화장실</div>
+                    <div class="fixture sink">싱크대</div>
+                    <div class="fixture shoe-rack">신발장</div>
+                    <div class="fixture stairs">계단</div>
+                    <div class="fixture back-door"></div>
+                    <div class="fixture bookshelf movable" id="bookshelf">책장</div>
+                </div>
+                <div class="room-label">1층</div>
+            </div>
+
+            <!-- 2층 래퍼 -->
+            <div class="room-wrapper">
+                <div class="room room-2f" id="room-2f">
+                    <div class="fixture void-area">X</div>
+                    <div class="fixture partition-area"></div>
+                    <div class="fixture stairs-2f">계단</div>
+                </div>
+                <div class="room-label">2층</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-warning" onclick="rotateSelected()">회전</button>
+            <button class="btn-danger" onclick="deleteSelected()">삭제</button>
+            <button class="btn-primary" onclick="saveToLocal()">저장하기</button>
+            <button class="btn-outline" onclick="loadFromLocal()">불러오기</button>
+            <button class="btn-secondary" onclick="exportToJson()">내보내기</button>
+            <button class="btn-secondary" onclick="importFromJson()">가져오기</button>
+            <button class="btn-success" onclick="saveAsImage()">이미지 저장</button>
+        </div>
+    </div>
+
+    <div id="palette-container">
+        <h3>가구 목록</h3>
+        <ul id="palette-list"></ul>
+
+        <div id="creation-panel">
+            <div class="form-section">
+                <label>종류</label>
+                <select id="category" onchange="handleCategoryChange()">
+                    <option value="desk">책상</option>
+                    <option value="chair">의자</option>
+                    <option value="custom">기타</option>
+                </select>
+            </div>
+            <div class="form-section">
+                <label>크기 (가로x세로, mm)</label>
+                <div class="input-row">
+                    <input type="number" id="width" placeholder="가로" value="120">
+                    <input type="number" id="height" placeholder="세로" value="60">
+                </div>
+            </div>
+            <div class="form-section" id="custom-name-section" style="display: none;">
+                 <label>이름</label>
+                 <input type="text" id="custom-name" placeholder="이름 입력">
+            </div>
+            <div class="form-section">
+                <label>색상</label>
+                <div class="color-swatches">
+                    <div class="swatch active" style="background-color: #FFFFFF;" onclick="selectColor('#FFFFFF', this)"></div>
+                    <div class="swatch" style="background-color: #E5DDCE;" onclick="selectColor('#E5DDCE', this)"></div>
+                    <div class="swatch" style="background-color: #AEC6CF;" onclick="selectColor('#AEC6CF', this)"></div> <!-- Light Blue -->
+                    <div class="swatch" style="background-color: #FDFD96;" onclick="selectColor('#FDFD96', this)"></div> <!-- Light Yellow -->
+                    <div class="swatch" style="background-color: #FFB6C1;" onclick="selectColor('#FFB6C1', this)"></div> <!-- Light Red/Pink -->
+                    <div class="swatch" style="background-color: #FFDAB9;" onclick="selectColor('#FFDAB9', this)"></div> <!-- Light Orange -->
+                </div>
+            </div>
+            <button onclick="addToPalette()">목록에 추가</button>
+        </div>
+
+        <button id="toggle-creation-btn" onclick="toggleCreationPanel()">새 가구 만들기 +</button>
+
+        <span style="font-size: 12px; color: #666; text-align: center; margin-top: 10px;">
+            (목록의 가구를 방으로 드래그하세요)
+        </span>
+    </div>
+
+    <div id="tooltip" class="dimension-tooltip"></div>
+    <div id="toast" class="toast">가구가 추가되었습니다</div>
+
+    <script>
+        const rooms = document.querySelectorAll('.room');
+        const tooltip = document.getElementById('tooltip');
+        let selectedElement = null;
+        let currentColor = '#FFFFFF';
+        let clipboard = null; // 클립보드 역할을 할 변수
+        let draggedPaletteItem = null; // 목록에서 드래그 중인 아이템 추적
+
+        // DOM 로드 완료 후 초기 설정
+        document.addEventListener('DOMContentLoaded', () => {
+            handleCategoryChange();
+            
+            // 기본 데이터 정의
+            const defaultData = {
+                "rooms": [
+                    [
+                        {"width":"30px","height":"100px","left":"0px","top":"410px","backgroundColor":"rgb(168, 159, 145)","transform":"","borderRadius":"0px 8px 0px 0px","text":"책장","id":"bookshelf","className":"fixture bookshelf movable"},
+                        {"width":"100px","height":"60px","left":"60px","top":"440px","backgroundColor":"rgb(255, 255, 255)","transform":"","borderRadius":"0px","text":"책상","id":"","className":"fixture movable"},
+                        {"width":"100px","height":"60px","left":"160px","top":"440px","backgroundColor":"rgb(255, 255, 255)","transform":"","borderRadius":"0px","text":"책상","id":"","className":"fixture movable"},
+                        {"width":"40px","height":"30px","left":"90px","top":"410px","backgroundColor":"rgb(255, 218, 185)","transform":"","borderRadius":"12px","text":"의자","id":"","className":"fixture movable"},
+                        {"width":"40px","height":"30px","left":"190px","top":"410px","backgroundColor":"rgb(255, 218, 185)","transform":"","borderRadius":"12px","text":"의자","id":"","className":"fixture movable"}
+                    ],
+                    []
+                ],
+                "palette": [
+                    {"width":"100","height":"60","color":"#FFFFFF","name":"책상","isChair":"false"},
+                    {"width":"40","height":"30","color":"#FFDAB9","name":"의자","isChair":"true"}
+                ]
+            };
+
+            // 로컬 스토리지에 데이터가 없으면 기본값 저장
+            if (!localStorage.getItem('interiorLayoutData')) {
+                localStorage.setItem('interiorLayoutData', JSON.stringify(defaultData));
+            }
+
+            // 저장된 데이터(또는 방금 저장한 기본값) 불러오기 (알림 없이)
+            loadFromLocal(true);
+        });
+
+        // 초기화: 기존 movable 요소(책장)에 드래그 및 회전 적용
+        document.querySelectorAll('.movable').forEach(el => {
+            makeDraggable(el);
+            enableRotation(el);
+        });
+
+        function enableRotation(el) {
+            el.addEventListener('dblclick', () => {
+                const currentRot = el.style.transform.replace(/[^\d.]/g, '') || 0;
+                const newRot = (parseInt(currentRot) + 90) % 360;
+                el.style.transform = `rotate(${newRot}deg)`;
+            });
+        }
+
+        // 방으로 드래그 앤 드롭
+        rooms.forEach(room => {
+            room.addEventListener('dragover', e => {
+                e.preventDefault();
+            });
+
+            room.addEventListener('drop', e => {
+                e.preventDefault();
+                const data = JSON.parse(e.dataTransfer.getData('application/json'));
+                const roomRect = room.getBoundingClientRect();
+
+                // 드롭 위치에 가구 중앙이 오도록 좌표 보정
+                const left = e.clientX - roomRect.left - (data.width / 2);
+                const top = e.clientY - roomRect.top - (data.height / 2);
+
+                const el = document.createElement('div');
+                el.classList.add('fixture', 'movable');
+                el.style.width = data.width + 'px';
+                el.style.height = data.height + 'px';
+                el.style.backgroundColor = data.color;
+                el.style.left = left + 'px';
+                el.style.top = top + 'px';
+                el.innerText = data.name;
+                el.style.color = '#333'; // 가구 위 텍스트 색상
+                
+                if (data.isChair === 'true') {
+                    el.style.borderRadius = '12px';
+                }
+                
+                createInRoom(el, room);
+                selectElement(el); // 드롭 후 바로 선택 상태로 변경
+            });
+        });
+
+        // 모바일/터치 환경 대응: 팔레트 아이템 클릭 시 방 중앙에 추가 (드래그 대용)
+        // (addToPalette 함수 내에서 이벤트 리스너 추가됨)
+
+        // 호버 시 치수 표시
+        rooms.forEach(room => {
+            room.addEventListener('mouseover', (e) => {
+                if (e.target.classList.contains('fixture') || e.target.classList.contains('movable')) {
+                    const updateTooltip = () => {
+                        const rect = e.target.getBoundingClientRect();
+                        const w = Math.round(rect.width);
+                        const h = Math.round(rect.height);
+                        tooltip.textContent = `${w}mm x ${h}mm`;
+                    };
+                    
+                    updateTooltip();
+                    tooltip.style.display = 'block';
+                    
+                    const moveTooltip = (evt) => {
+                        tooltip.style.left = evt.pageX + 10 + 'px';
+                        tooltip.style.top = evt.pageY + 10 + 'px';
+                    };
+                    
+                    e.target.addEventListener('mousemove', moveTooltip);
+                    
+                    e.target.addEventListener('mouseleave', () => {
+                        tooltip.style.display = 'none';
+                        e.target.removeEventListener('mousemove', moveTooltip);
+                    }, { once: true });
+                }
+            });
+
+            // 배경 클릭 시 선택 해제
+            room.addEventListener('mousedown', (e) => {
+                if (e.target === room) {
+                    deselectAll();
+                }
+            });
+        });
+
+        function deselectAll() {
+            if (selectedElement) {
+                selectedElement.classList.remove('selected');
+                selectedElement = null;
+            }
+        }
+
+        function selectElement(el) {
+            deselectAll();
+            selectedElement = el;
+            
+            // 선택된 요소를 가장 위로 올림 (Z-index 조정)
+            document.querySelectorAll('.movable').forEach(m => m.style.zIndex = '10');
+            el.style.zIndex = '100';
+            el.classList.add('selected');
+        }
+
+        // 카테고리 변경 핸들러
+        function handleCategoryChange() {
+            const cat = document.getElementById('category').value;
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            const customNameSection = document.getElementById('custom-name-section');
+            
+            if (cat === 'desk') {
+                widthInput.value = 120;
+                heightInput.value = 60;
+                customNameSection.style.display = 'none';
+            } else if (cat === 'chair') {
+                widthInput.value = 45;
+                heightInput.value = 45;
+                customNameSection.style.display = 'none';
+            } else {
+                customNameSection.style.display = 'block';
+            }
+        }
+
+        // 새 가구 만들기 패널 토글
+        function toggleCreationPanel() {
+            const panel = document.getElementById('creation-panel');
+            const btn = document.getElementById('toggle-creation-btn');
+            const isHidden = panel.style.display === 'none' || panel.style.display === '';
+            
+            panel.style.display = isHidden ? 'flex' : 'none';
+            btn.textContent = isHidden ? '만들기 취소 -' : '새 가구 만들기 +';
+        }
+
+        // 색상 선택
+        function selectColor(color, el) {
+            currentColor = color;
+            document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // 삭제 버튼(토글 버튼) 드롭 존 설정
+        const toggleBtn = document.getElementById('toggle-creation-btn');
+        
+        toggleBtn.addEventListener('dragover', e => {
+            e.preventDefault(); // 드롭 허용
+        });
+
+        toggleBtn.addEventListener('drop', e => {
+            e.preventDefault();
+            if (draggedPaletteItem) {
+                draggedPaletteItem.remove();
+                draggedPaletteItem = null;
+                // 드롭 후 버튼 상태 복구는 dragend에서 처리됨
+            }
+        });
+
+        // 가구 목록에 추가
+        function addToPalette() {
+            const category = document.getElementById('category').value;
+            const w = document.getElementById('width').value;
+            const h = document.getElementById('height').value;
+            
+            let name;
+            if (category === 'custom') {
+                name = document.getElementById('custom-name').value || '기타';
+            } else if (category === 'desk') {
+                name = '책상';
+            } else {
+                name = '의자';
+            }
+
+            const li = document.createElement('li');
+            li.className = 'palette-item';
+            li.draggable = true;
+            
+            // 색상 표시 원형 아이콘
+            const colorDot = document.createElement('div');
+            colorDot.style.width = '16px';
+            colorDot.style.height = '16px';
+            colorDot.style.backgroundColor = currentColor;
+            colorDot.style.borderRadius = '50%';
+            colorDot.style.marginRight = '10px';
+            colorDot.style.border = '1px solid rgba(0,0,0,0.1)';
+            
+            li.appendChild(colorDot);
+            li.appendChild(document.createTextNode(`${name} (${w}mm x ${h}mm)`));
+
+            li.dataset.width = w;
+            li.dataset.height = h;
+            li.dataset.color = currentColor;
+            li.dataset.name = name;
+            li.dataset.isChair = (category === 'chair').toString();
+
+            li.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('application/json', JSON.stringify(e.target.dataset));
+                draggedPaletteItem = li;
+                li.classList.add('dragging');
+                
+                // 버튼을 삭제 모드로 변경
+                const btn = document.getElementById('toggle-creation-btn');
+                btn.classList.add('delete-zone');
+                btn.innerText = '🗑️ 여기에 드롭하여 삭제';
+                document.getElementById('creation-panel').style.display = 'none'; // 패널 닫기
+            });
+
+            li.addEventListener('dragend', e => {
+                li.classList.remove('dragging');
+                draggedPaletteItem = null;
+                
+                // 버튼 원래대로 복구
+                const btn = document.getElementById('toggle-creation-btn');
+                btn.classList.remove('delete-zone');
+                btn.innerText = '새 가구 만들기 +';
+            });
+
+            // 모바일 대응: 클릭(탭) 시 방 중앙에 추가
+            li.addEventListener('click', () => {
+                // 이미 드래그 중이면 클릭 이벤트 무시
+                if (li.classList.contains('dragging')) return;
+                
+                const data = li.dataset;
+                // 기본적으로 1층(첫 번째 방)에 추가
+                const targetRoom = rooms[0];
+                const roomRect = targetRoom.getBoundingClientRect();
+                const centerX = roomRect.width / 2 - (parseInt(data.width) / 2);
+                const centerY = roomRect.height / 2 - (parseInt(data.height) / 2);
+                
+                addFurnitureToRoom(data, centerX, centerY, targetRoom);
+                showToast(`'${name}' 가구가 방에 추가되었습니다.`);
+            });
+
+            document.getElementById('palette-list').appendChild(li);
+
+            // UX 개선: 목록에 추가 후 패널 닫기
+            const panel = document.getElementById('creation-panel');
+            const btn = document.getElementById('toggle-creation-btn');
+            panel.style.display = 'none';
+            btn.textContent = '새 가구 만들기 +';
+        }
+
+        // 선택된 가구 삭제
+        function deleteSelected() {
+            if (selectedElement) {
+                selectedElement.remove();
+                selectedElement = null;
+                tooltip.style.display = 'none';
+            } else {
+                alert('삭제할 가구를 먼저 클릭해주세요.');
+            }
+        }
+
+        // 전체 삭제
+        function clearRoom() {
+            if (confirm('방에 있는 모든 가구를 삭제하시겠습니까?')) {
+                document.querySelectorAll('.movable').forEach(el => el.remove());
+                selectedElement = null;
+                tooltip.style.display = 'none';
+            }
+        }
+
+        // 선택된 가구 회전
+        function rotateSelected() {
+            if (!selectedElement) return;
+            const currentRot = selectedElement.style.transform.replace(/[^\d.]/g, '') || 0;
+            const newRot = (parseInt(currentRot) + 90) % 360;
+            selectedElement.style.transform = `rotate(${newRot}deg)`;
+        }
+
+        // 데이터 수집 헬퍼 함수
+        function getLayoutData() {
+            const roomsData = [];
+            rooms.forEach((room) => {
+                const items = [];
+                room.querySelectorAll('.movable').forEach(el => {
+                    const style = window.getComputedStyle(el);
+                    items.push({
+                        width: el.style.width || style.width,
+                        height: el.style.height || style.height,
+                        left: el.style.left || style.left,
+                        top: el.style.top || style.top,
+                        backgroundColor: el.style.backgroundColor || style.backgroundColor,
+                        transform: el.style.transform,
+                        borderRadius: el.style.borderRadius || style.borderRadius,
+                        text: el.innerText,
+                        id: el.id,
+                        className: el.className // 클래스 정보 저장 (호환성 및 스타일 복구용)
+                    });
+                });
+                roomsData.push(items);
+            });
+
+            const paletteItems = [];
+            document.querySelectorAll('#palette-list .palette-item').forEach(li => {
+                paletteItems.push({
+                    width: li.dataset.width,
+                    height: li.dataset.height,
+                    color: li.dataset.color,
+                    name: li.dataset.name,
+                    isChair: li.dataset.isChair
+                });
+            });
+
+            return { rooms: roomsData, palette: paletteItems };
+        }
+
+        // 데이터 복구 헬퍼 함수
+        function restoreLayout(data) {
+            if (!data.rooms && !data.room) {
+                alert('올바르지 않은 데이터 형식입니다.');
+                return;
+            }
+
+            // 1. 방 초기화 (ID가 없는 사용자 추가 가구만 삭제)
+            document.querySelectorAll('.movable').forEach(el => {
+                if (!el.id) el.remove();
+            });
+            
+            const roomsList = data.rooms || [data.room];
+            roomsList.forEach((roomItems, index) => {
+                if (index >= rooms.length) return;
+                const targetRoom = rooms[index];
+
+                roomItems.forEach(item => {
+                    const existingEl = item.id ? targetRoom.querySelector('#' + item.id) : null;
+                    if (existingEl) {
+                        Object.assign(existingEl.style, item);
+                        if (item.transform) existingEl.style.transform = item.transform;
+                    } else {
+                        addFurnitureToRoom({
+                            width: parseInt(item.width),
+                            height: parseInt(item.height),
+                            color: item.backgroundColor,
+                            name: item.text,
+                            isChair: (item.borderRadius && item.borderRadius !== '0px') ? 'true' : 'false'
+                        }, parseFloat(item.left), parseFloat(item.top), targetRoom, item.transform, item.className);
+                    }
+                });
+            });
+
+            // 2. 팔레트 복구
+            if (data.palette) {
+                document.getElementById('palette-list').innerHTML = '';
+                data.palette.forEach(pItem => restorePaletteItem(pItem));
+            }
+        }
+
+        // 1. 저장하기 (LocalStorage)
+        function saveToLocal() {
+            const data = getLayoutData();
+            localStorage.setItem('interiorLayoutData', JSON.stringify(data));
+            showToast('브라우저에 저장되었습니다.');
+        }
+
+        // 2. 불러오기 (LocalStorage)
+        function loadFromLocal(silent = false) {
+            const dataStr = localStorage.getItem('interiorLayoutData');
+            if (!dataStr) {
+                if (!silent) alert('저장된 데이터가 없습니다.');
+                return;
+            }
+            try {
+                const data = JSON.parse(dataStr);
+                restoreLayout(data);
+                if (!silent) showToast('브라우저에서 불러왔습니다.');
+            } catch (e) {
+                console.error(e);
+                if (!silent) alert('데이터를 불러오는 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 3. 내보내기 (JSON Export)
+        function exportToJson() {
+            const data = getLayoutData();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "interior_plan.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // 4. 가져오기 (JSON Import)
+        function importFromJson() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = event => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        restoreLayout(data);
+                        showToast('파일에서 불러왔습니다.');
+                    } catch (err) {
+                        console.error(err);
+                        alert('파일을 읽는 중 오류가 발생했습니다.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // 이미지 저장 기능
+        function saveAsImage() {
+            // 선택된 요소의 테두리(파란색)를 잠시 제거
+            deselectAll();
+
+            html2canvas(document.querySelector(".rooms-container"), {
+                backgroundColor: null, // 투명 배경 유지 (CSS 배경색 사용)
+                scale: 2 // 고해상도
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'interior_plan.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        function addFurnitureToRoom(data, left, top, targetRoom, transform = '', className = 'fixture movable') {
+            const el = document.createElement('div');
+            el.className = className; // 저장된 클래스명 사용 (없으면 기본값)
+            el.style.width = data.width + 'px';
+            el.style.height = data.height + 'px';
+            el.style.backgroundColor = data.color;
+            el.style.left = left + 'px';
+            el.style.top = top + 'px';
+            el.innerText = data.name;
+            el.style.color = '#333';
+            
+            if (data.isChair === 'true') {
+                el.style.borderRadius = '12px';
+            }
+            if (transform) {
+                el.style.transform = transform;
+            }
+            
+            createInRoom(el, targetRoom);
+            selectElement(el);
+        }
+
+        function restorePaletteItem(data) {
+            const li = document.createElement('li');
+            li.className = 'palette-item';
+            li.draggable = true;
+            
+            const colorDot = document.createElement('div');
+            colorDot.style.width = '16px';
+            colorDot.style.height = '16px';
+            colorDot.style.backgroundColor = data.color;
+            colorDot.style.borderRadius = '50%';
+            colorDot.style.marginRight = '10px';
+            colorDot.style.border = '1px solid rgba(0,0,0,0.1)';
+            
+            li.appendChild(colorDot);
+            li.appendChild(document.createTextNode(`${data.name} (${data.width}mm x ${data.height}mm)`));
+
+            li.dataset.width = data.width;
+            li.dataset.height = data.height;
+            li.dataset.color = data.color;
+            li.dataset.name = data.name;
+            li.dataset.isChair = data.isChair;
+
+            li.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('application/json', JSON.stringify(e.target.dataset));
+                draggedPaletteItem = li;
+                li.classList.add('dragging');
+                const btn = document.getElementById('toggle-creation-btn');
+                btn.classList.add('delete-zone');
+                btn.innerText = '🗑️ 여기에 드롭하여 삭제';
+                document.getElementById('creation-panel').style.display = 'none';
+            });
+
+            li.addEventListener('dragend', e => {
+                li.classList.remove('dragging');
+                draggedPaletteItem = null;
+                const btn = document.getElementById('toggle-creation-btn');
+                btn.classList.remove('delete-zone');
+                btn.innerText = '새 가구 만들기 +';
+            });
+
+            li.addEventListener('click', () => {
+                if (li.classList.contains('dragging')) return;
+                const targetRoom = rooms[0];
+                const roomRect = targetRoom.getBoundingClientRect();
+                const centerX = roomRect.width / 2 - (parseInt(data.width) / 2);
+                const centerY = roomRect.height / 2 - (parseInt(data.height) / 2);
+                addFurnitureToRoom(data, centerX, centerY, targetRoom);
+                showToast(`'${data.name}' 가구가 방에 추가되었습니다.`);
+            });
+
+            document.getElementById('palette-list').appendChild(li);
+        }
+
+        // 방 안에 가구를 생성하고 필요한 이벤트를 바인딩하는 함수
+        function createInRoom(el, targetRoom) {
+            enableRotation(el);
+            makeDraggable(el);
+            targetRoom.appendChild(el);
+        }
+
+        function makeDraggable(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            // 마우스 이벤트
+            elmnt.onmousedown = dragMouseDown;
+            // 터치 이벤트 (모바일)
+            elmnt.ontouchstart = dragMouseDown;
+
+            function dragMouseDown(e) {
+                // 터치 이벤트일 경우 preventDefault를 호출하면 스크롤이 막힘. 
+                // 하지만 가구 이동을 위해 필요할 수 있음. 상황에 따라 조절.
+                if (e.type !== 'touchstart') e.preventDefault();
+                
+                e.stopPropagation(); // 부모(room) 클릭 이벤트 전파 방지
+                selectElement(elmnt); // 클릭 시 선택
+
+                // 마우스/터치 좌표 통일
+                pos3 = e.clientX || e.touches[0].clientX;
+                pos4 = e.clientY || e.touches[0].clientY;
+                
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+                
+                // 모바일 이벤트 바인딩
+                document.ontouchend = closeDragElement;
+                document.ontouchmove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                // 터치 이동 시 화면 스크롤 방지
+                if (e.type === 'touchmove') e.preventDefault();
+
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+
+                pos1 = pos3 - clientX;
+                pos2 = pos4 - clientY;
+                pos3 = clientX;
+                pos4 = clientY;
+
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+                document.ontouchend = null;
+                document.ontouchmove = null;
+                
+                // 자석 효과 (10px 단위 스냅)
+                const gridSize = 10;
+                elmnt.style.top = Math.round(elmnt.offsetTop / gridSize) * gridSize + "px";
+                elmnt.style.left = Math.round(elmnt.offsetLeft / gridSize) * gridSize + "px";
+            }
+        }
+
+        // 키보드 단축키 (복사, 붙여넣기, 삭제)
+        document.addEventListener('keydown', (e) => {
+            // 입력 필드에 포커스가 있을 때는 단축키를 비활성화
+            if (document.activeElement.tagName.toLowerCase() === 'input') {
+                return;
+            }
+
+            // 'Delete' 또는 'Backspace' 키로 삭제
+            if ((e.key === 'Delete' || e.key === 'Backspace') && selectedElement) {
+                e.preventDefault();
+                deleteSelected();
+            }
+
+            // Ctrl+C 로 복사
+            if (e.ctrlKey && e.key.toLowerCase() === 'c' && selectedElement) {
+                e.preventDefault();
+                const style = window.getComputedStyle(selectedElement);
+                clipboard = {
+                    width: selectedElement.style.width || style.width,
+                    height: selectedElement.style.height || style.height,
+                    backgroundColor: selectedElement.style.backgroundColor || style.backgroundColor,
+                    transform: selectedElement.style.transform,
+                    borderRadius: selectedElement.style.borderRadius || style.borderRadius,
+                    text: selectedElement.innerText
+                };
+                
+                // 복사 시각적 피드백
+                selectedElement.style.transition = 'transform 0.1s ease-in-out';
+                selectedElement.style.transform += ' scale(1.05)';
+                setTimeout(() => {
+                    if(selectedElement) { // 복사 후 바로 삭제되지 않았을 경우에만
+                       selectedElement.style.transform = selectedElement.style.transform.replace(' scale(1.05)', '');
+                    }
+                }, 100);
+            }
+
+            // Ctrl+V 로 붙여넣기
+            if (e.ctrlKey && e.key.toLowerCase() === 'v' && clipboard) {
+                e.preventDefault();
+                
+                // 붙여넣기 할 대상 방 결정 (선택된 요소가 있으면 그 방, 없으면 1층)
+                const targetRoom = selectedElement ? selectedElement.closest('.room') : rooms[0];
+
+                const el = document.createElement('div');
+                Object.assign(el.style, { width: clipboard.width, height: clipboard.height, backgroundColor: clipboard.backgroundColor, transform: clipboard.transform, borderRadius: clipboard.borderRadius, color: '#333' });
+                el.classList.add('fixture', 'movable');
+                el.innerText = clipboard.text;
+
+                const lastPos = selectedElement ? { top: parseInt(selectedElement.style.top) || 0, left: parseInt(selectedElement.style.left) || 0 } : { top: 10, left: 10 };
+                el.style.top = (lastPos.top + 20) + "px";
+                el.style.left = (lastPos.left + 20) + "px";
+                
+                createInRoom(el, targetRoom);
+                selectElement(el); // 새로 붙여넣은 요소를 선택
+            }
+        });
+
+        // 색상 선택
+        function selectColor(color, el) {
+            currentColor = color;
+            document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // 가구 목록에 추가
+        function addToPalette() {
+            const category = document.getElementById('category').value;
+            const w = document.getElementById('width').value;
+            const h = document.getElementById('height').value;
+            
+            let name;
+            if (category === 'custom') {
+                name = document.getElementById('custom-name').value || '기타';
+            } else if (category === 'desk') {
+                name = '책상';
+            } else {
+                name = '의자';
+            }
+
+            const li = document.createElement('li');
+            li.className = 'palette-item';
+            li.draggable = true;
+            
+            // 색상 표시 원형 아이콘
+            const colorDot = document.createElement('div');
+            colorDot.style.width = '16px';
+            colorDot.style.height = '16px';
+            colorDot.style.backgroundColor = currentColor;
+            colorDot.style.borderRadius = '50%';
+            colorDot.style.marginRight = '10px';
+            colorDot.style.border = '1px solid rgba(0,0,0,0.1)';
+            
+            li.appendChild(colorDot);
+            li.appendChild(document.createTextNode(`${name} (${w}mm x ${h}mm)`));
+
+            li.dataset.width = w;
+            li.dataset.height = h;
+            li.dataset.color = currentColor;
+            li.dataset.name = name;
+            li.dataset.isChair = (category === 'chair').toString();
+
+            li.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('application/json', JSON.stringify(e.target.dataset));
+                draggedPaletteItem = li;
+                li.classList.add('dragging');
+                
+                // 버튼을 삭제 모드로 변경
+                const btn = document.getElementById('toggle-creation-btn');
+                btn.classList.add('delete-zone');
+                btn.innerText = '🗑️ 여기에 드롭하여 삭제';
+                document.getElementById('creation-panel').style.display = 'none'; // 패널 닫기
+            });
+
+            li.addEventListener('dragend', e => {
+                li.classList.remove('dragging');
+                draggedPaletteItem = null;
+                
+                // 버튼 원래대로 복구
+                const btn = document.getElementById('toggle-creation-btn');
+                btn.classList.remove('delete-zone');
+                btn.innerText = '새 가구 만들기 +';
+            });
+
+            document.getElementById('palette-list').appendChild(li);
+            
+            // 토스트 메시지 표시
+            showToast(`'${name}' 가구가 목록에 추가되었습니다.`);
+
+            // UX 개선: 목록에 추가 후 패널 닫기
+            const panel = document.getElementById('creation-panel');
+            const btn = document.getElementById('toggle-creation-btn');
+            panel.style.display = 'none';
+            btn.textContent = '새 가구 만들기 +';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 선택된 가구 삭제
+        function deleteSelected() {
+            if (selectedElement) {
+                selectedElement.remove();
+                selectedElement = null;
+                tooltip.style.display = 'none';
+            } else {
+                alert('삭제할 가구를 먼저 클릭해주세요.');
+            }
+        }
+
+        // 전체 삭제
+        function clearRoom() {
+            if (confirm('방에 있는 모든 가구를 삭제하시겠습니까?')) {
+                document.querySelectorAll('.movable').forEach(el => el.remove());
+                selectedElement = null;
+                tooltip.style.display = 'none';
+            }
+        }
+
+        // 선택된 가구 회전
+        function rotateSelected() {
+            if (!selectedElement) return;
+            const currentRot = selectedElement.style.transform.replace(/[^\d.]/g, '') || 0;
+            const newRot = (parseInt(currentRot) + 90) % 360;
+            selectedElement.style.transform = `rotate(${newRot}deg)`;
+        }
+
+        // 방 안에 가구를 생성하고 필요한 이벤트를 바인딩하는 함수
+        function createInRoom(el, targetRoom) {
+            enableRotation(el);
+            makeDraggable(el);
+            targetRoom.appendChild(el);
+        }
+
+        function makeDraggable(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            // 마우스 이벤트
+            elmnt.onmousedown = dragMouseDown;
+            // 터치 이벤트 (모바일)
+            elmnt.ontouchstart = dragMouseDown;
+
+            function dragMouseDown(e) {
+                // 터치 이벤트일 경우 preventDefault를 호출하면 스크롤이 막힘. 
+                // 하지만 가구 이동을 위해 필요할 수 있음. 상황에 따라 조절.
+                if (e.type !== 'touchstart') e.preventDefault();
+                
+                e.stopPropagation(); // 부모(room) 클릭 이벤트 전파 방지
+                selectElement(elmnt); // 클릭 시 선택
+
+                // 마우스/터치 좌표 통일
+                pos3 = e.clientX || e.touches[0].clientX;
+                pos4 = e.clientY || e.touches[0].clientY;
+                
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+                
+                // 모바일 이벤트 바인딩
+                document.ontouchend = closeDragElement;
+                document.ontouchmove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                // 터치 이동 시 화면 스크롤 방지
+                if (e.type === 'touchmove') e.preventDefault();
+
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+
+                pos1 = pos3 - clientX;
+                pos2 = pos4 - clientY;
+                pos3 = clientX;
+                pos4 = clientY;
+
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+                document.ontouchend = null;
+                document.ontouchmove = null;
+                
+                // 자석 효과 (10px 단위 스냅)
+                const gridSize = 10;
+                elmnt.style.top = Math.round(elmnt.offsetTop / gridSize) * gridSize + "px";
+                elmnt.style.left = Math.round(elmnt.offsetLeft / gridSize) * gridSize + "px";
+            }
+        }
+    </script>
+</body>
+</html>
