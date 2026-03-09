@@ -297,6 +297,12 @@
             white-space: nowrap;
         }
 
+        /* 가구 내부 텍스트 (회전 시 고정용) */
+        .fixture-text {
+            pointer-events: none; /* 클릭 시 부모 요소가 선택되도록 */
+            transition: transform 0.2s;
+        }
+
         /* 가구 목록 (팔레트) */
         #palette-container {
             width: 200px;
@@ -500,8 +506,14 @@
                 <label>종류</label>
                 <select id="category" onchange="handleCategoryChange()">
                     <option value="desk">책상</option>
+                    <option value="table">식탁</option>
                     <option value="chair">의자</option>
-                    <option value="custom">기타</option>
+                    <option value="sofa">소파</option>
+                    <option value="bed-s">침대(싱글)</option>
+                    <option value="bed-q">침대(퀸)</option>
+                    <option value="fridge">냉장고</option>
+                    <option value="tv-stand">TV 거실장</option>
+                    <option value="custom">직접 입력</option>
                 </select>
             </div>
             <div class="form-section">
@@ -565,7 +577,13 @@
                 ],
                 "palette": [
                     {"width":"100","height":"60","color":"#FFFFFF","name":"책상","isChair":"false"},
-                    {"width":"40","height":"30","color":"#FFDAB9","name":"의자","isChair":"true"}
+                    {"width":"40","height":"30","color":"#FFDAB9","name":"의자","isChair":"true"},
+                    {"width":"200","height":"80","color":"#E5DDCE","name":"소파","isChair":"false"},
+                    {"width":"100","height":"200","color":"#FFFFFF","name":"침대(S)","isChair":"false"},
+                    {"width":"150","height":"200","color":"#FFFFFF","name":"침대(Q)","isChair":"false"},
+                    {"width":"140","height":"80","color":"#E5DDCE","name":"식탁","isChair":"false"},
+                    {"width":"90","height":"90","color":"#AEC6CF","name":"냉장고","isChair":"false"},
+                    {"width":"180","height":"40","color":"#E5DDCE","name":"TV장","isChair":"false"}
                 ]
             };
 
@@ -589,6 +607,7 @@
                 const currentRot = el.style.transform.replace(/[^\d.]/g, '') || 0;
                 const newRot = (parseInt(currentRot) + 90) % 360;
                 el.style.transform = `rotate(${newRot}deg)`;
+                setTextRotation(el, newRot);
             });
         }
 
@@ -614,7 +633,7 @@
                 el.style.backgroundColor = data.color;
                 el.style.left = left + 'px';
                 el.style.top = top + 'px';
-                el.innerText = data.name;
+                el.innerHTML = `<span class="fixture-text">${data.name}</span>`;
                 el.style.color = '#333'; // 가구 위 텍스트 색상
                 
                 if (data.isChair === 'true') {
@@ -693,9 +712,33 @@
                 widthInput.value = 120;
                 heightInput.value = 60;
                 customNameSection.style.display = 'none';
+            } else if (cat === 'table') {
+                widthInput.value = 140;
+                heightInput.value = 80;
+                customNameSection.style.display = 'none';
             } else if (cat === 'chair') {
                 widthInput.value = 45;
                 heightInput.value = 45;
+                customNameSection.style.display = 'none';
+            } else if (cat === 'sofa') {
+                widthInput.value = 200;
+                heightInput.value = 80;
+                customNameSection.style.display = 'none';
+            } else if (cat === 'bed-s') {
+                widthInput.value = 100;
+                heightInput.value = 200;
+                customNameSection.style.display = 'none';
+            } else if (cat === 'bed-q') {
+                widthInput.value = 150;
+                heightInput.value = 200;
+                customNameSection.style.display = 'none';
+            } else if (cat === 'fridge') {
+                widthInput.value = 90;
+                heightInput.value = 90;
+                customNameSection.style.display = 'none';
+            } else if (cat === 'tv-stand') {
+                widthInput.value = 180;
+                heightInput.value = 40;
                 customNameSection.style.display = 'none';
             } else {
                 customNameSection.style.display = 'block';
@@ -743,9 +786,21 @@
             
             let name;
             if (category === 'custom') {
-                name = document.getElementById('custom-name').value || '기타';
+                name = document.getElementById('custom-name').value || '직접 입력';
             } else if (category === 'desk') {
                 name = '책상';
+            } else if (category === 'table') {
+                name = '식탁';
+            } else if (category === 'sofa') {
+                name = '소파';
+            } else if (category === 'bed-s') {
+                name = '침대(S)';
+            } else if (category === 'bed-q') {
+                name = '침대(Q)';
+            } else if (category === 'fridge') {
+                name = '냉장고';
+            } else if (category === 'tv-stand') {
+                name = 'TV장';
             } else {
                 name = '의자';
             }
@@ -845,6 +900,7 @@
             const currentRot = selectedElement.style.transform.replace(/[^\d.]/g, '') || 0;
             const newRot = (parseInt(currentRot) + 90) % 360;
             selectedElement.style.transform = `rotate(${newRot}deg)`;
+            setTextRotation(selectedElement, newRot);
         }
 
         // 데이터 수집 헬퍼 함수
@@ -906,6 +962,7 @@
                     if (existingEl) {
                         Object.assign(existingEl.style, item);
                         if (item.transform) existingEl.style.transform = item.transform;
+                        setTextRotation(existingEl); // 텍스트 회전 복구
                     } else {
                         addFurnitureToRoom({
                             width: parseInt(item.width),
@@ -1010,7 +1067,7 @@
             el.style.backgroundColor = data.color;
             el.style.left = left + 'px';
             el.style.top = top + 'px';
-            el.innerText = data.name;
+            el.innerHTML = `<span class="fixture-text">${data.name}</span>`;
             el.style.color = '#333';
             
             if (data.isChair === 'true') {
@@ -1164,7 +1221,7 @@
                     backgroundColor: selectedElement.style.backgroundColor || style.backgroundColor,
                     transform: selectedElement.style.transform,
                     borderRadius: selectedElement.style.borderRadius || style.borderRadius,
-                    text: selectedElement.innerText
+                    text: selectedElement.innerText // innerText는 span 내부 텍스트만 가져옴
                 };
                 
                 // 복사 시각적 피드백
@@ -1187,16 +1244,33 @@
                 const el = document.createElement('div');
                 Object.assign(el.style, { width: clipboard.width, height: clipboard.height, backgroundColor: clipboard.backgroundColor, transform: clipboard.transform, borderRadius: clipboard.borderRadius, color: '#333' });
                 el.classList.add('fixture', 'movable');
-                el.innerText = clipboard.text;
+                el.innerHTML = `<span class="fixture-text">${clipboard.text}</span>`;
 
                 const lastPos = selectedElement ? { top: parseInt(selectedElement.style.top) || 0, left: parseInt(selectedElement.style.left) || 0 } : { top: 10, left: 10 };
                 el.style.top = (lastPos.top + 20) + "px";
                 el.style.left = (lastPos.left + 20) + "px";
                 
                 createInRoom(el, targetRoom);
+                setTextRotation(el); // 붙여넣기 시 회전 상태에 맞춰 텍스트 정렬
                 selectElement(el); // 새로 붙여넣은 요소를 선택
             }
         });
+
+        // 텍스트 역회전 적용 함수
+        function setTextRotation(el, deg = null) {
+            const textEl = el.querySelector('.fixture-text');
+            if (!textEl) return;
+
+            if (deg === null) {
+                // 각도가 주어지지 않으면 현재 transform에서 추출
+                const transform = el.style.transform;
+                const match = transform.match(/rotate\((-?\d+\.?\d*)deg\)/);
+                deg = match ? parseFloat(match[1]) : 0;
+            }
+
+            // 부모가 회전한 만큼 반대로 회전
+            textEl.style.transform = `rotate(${-deg}deg)`;
+        }
 
         // 색상 선택
         function selectColor(color, el) {
